@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,8 +51,8 @@ public class ActivititestApplicationTests {
     @Test
     public void findTask() {
 
-//        List<Task> list = taskService.createTaskQuery().taskAssignee("bb").includeProcessVariables().list();
-        List<Task> list = taskService.createTaskQuery().taskId("47505").includeProcessVariables().list();
+        List<Task> list = taskService.createTaskQuery().taskAssignee("bb").includeProcessVariables().list();
+//        List<Task> list = taskService.createTaskQuery().taskId("47505").includeProcessVariables().list();
         Task task = list.get(0);
         String taskId = task.getId();
         Map<String, Object> variables = task.getProcessVariables();
@@ -71,6 +74,20 @@ public class ActivititestApplicationTests {
 
         taskService.complete(taskId,variables);
         System.out.println("完成任务!");
+    }
+
+    @Test
+    public void getBpmn() throws IOException {
+
+        FileOutputStream fis = new FileOutputStream("d:/test/approve.png");
+
+        InputStream in = repositoryService.getResourceAsStream("1", "approve.approve.png");
+        byte[] tmp = new byte[in.available()];
+        in.read(tmp);
+        fis.write(tmp);
+        fis.close();
+        in.close();
+        System.out.println("输出完成!");
     }
 
 }
