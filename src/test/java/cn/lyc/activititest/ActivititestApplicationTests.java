@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.Test;
@@ -79,15 +80,29 @@ public class ActivititestApplicationTests {
     @Test
     public void getBpmn() throws IOException {
 
-        FileOutputStream fis = new FileOutputStream("d:/test/approve.png");
+        FileOutputStream fos = new FileOutputStream("d:/test/data_share_v2.bpmn");
 
-        InputStream in = repositoryService.getResourceAsStream("1", "approve.approve.png");
+        InputStream in = repositoryService.getResourceAsStream("1", "data_share_v2.bpmn");
         byte[] tmp = new byte[in.available()];
         in.read(tmp);
-        fis.write(tmp);
-        fis.close();
+        fos.write(tmp);
+        fos.close();
         in.close();
         System.out.println("输出完成!");
+    }
+
+    @Test
+    public void checkProDefCount(){
+
+        ExecutionQuery executionQuery = runtimeService.createExecutionQuery().processDefinitionKey("myProcess_1");
+        System.out.println("******************" + executionQuery.count());
+    }
+
+    @Test
+    public void delTask(){
+
+        runtimeService.deleteProcessInstance("20001","撤销流程");
+        System.out.println("撤销流程成功!");
     }
 
 }

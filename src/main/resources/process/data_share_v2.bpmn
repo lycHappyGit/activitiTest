@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1556181732496" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="data_share_v2" isClosed="false" isExecutable="true" name="数据共享申请v2" processType="None">
+    <startEvent id="startevent_data_share" name="StartEvent">
+      <extensionElements>
+        <activiti:executionListener class="boot.spring.listner.ProcessExecutionListner" event="start"/>
+      </extensionElements>
+    </startEvent>
+    <userTask activiti:candidateGroups="data_specialist_distribute" activiti:exclusive="true" id="data_specialist_audit" name="数据专员初审">
+      <extensionElements>
+        <activiti:taskListener class="boot.spring.listner.ProcessTaskListener" event="all"/>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="_4" sourceRef="startevent_data_share" targetRef="data_specialist_audit"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_5" name="ExclusiveGateway"/>
+    <sequenceFlow id="_6" sourceRef="data_specialist_audit" targetRef="_5"/>
+    <endEvent id="_7" name="EndEvent">
+      <extensionElements>
+        <activiti:executionListener class="boot.spring.listner.ProcessExecutionListner" event="end"/>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="_8" name="数据专员驳回" sourceRef="_5" targetRef="_7">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_specialist_audit_agree=='false'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask activiti:candidateGroups="data_yw_leader" activiti:exclusive="true" id="data_yw_leader_audit" name="政数局业务领导审批">
+      <extensionElements>
+        <activiti:taskListener class="boot.spring.listner.ProcessTaskListener" event="all"/>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="_10" name="数据专员同意，选择领导" sourceRef="_5" targetRef="data_yw_leader_audit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_specialist_audit_agree=='true'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_11" name="ExclusiveGateway"/>
+    <sequenceFlow id="_12" sourceRef="data_yw_leader_audit" targetRef="_11"/>
+    <sequenceFlow id="_13" name="业务领导同意，且需要分管领导审批" sourceRef="_11" targetRef="data_fg_leader_audit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_yw_leader_audit_agree=='true' && need_fg_leader_audit=='true'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="_14" name="EndEvent">
+      <extensionElements>
+        <activiti:executionListener class="boot.spring.listner.ProcessExecutionListner" event="end"/>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="_15" name="业务领导不同意，结束" sourceRef="_11" targetRef="_14">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_yw_leader_audit_agree=='false'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask activiti:candidateGroups="data_specialist_ops" activiti:exclusive="true" id="data_ops_audit" name="办结">
+      <extensionElements>
+        <activiti:taskListener class="boot.spring.listner.ProcessTaskListener" event="all"/>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="_3" name="业务领导同意，且不需要分管领导审批" sourceRef="_11" targetRef="data_ops_audit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_yw_leader_audit_agree=='true' && need_fg_leader_audit=='false'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="_18" name="EndEvent">
+      <extensionElements>
+        <activiti:executionListener class="boot.spring.listner.ProcessExecutionListner" event="end"/>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="_2" sourceRef="data_ops_audit" targetRef="_18"/>
+    <userTask activiti:candidateGroups="data_fg_leader" activiti:exclusive="true" id="data_fg_leader_audit" name="政数局分管领导审批">
+      <extensionElements>
+        <activiti:taskListener class="boot.spring.listner.ProcessTaskListener" event="all"/>
+      </extensionElements>
+    </userTask>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_9" name="ExclusiveGateway"/>
+    <sequenceFlow id="_16" sourceRef="data_fg_leader_audit" targetRef="_9"/>
+    <endEvent id="_17" name="EndEvent">
+      <extensionElements>
+        <activiti:executionListener class="boot.spring.listner.ProcessExecutionListner" event="end"/>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="_19" name="分管领导不同意" sourceRef="_9" targetRef="_17">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_fg_leader_audit_agree=='false'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_20" name="分管领导同意" sourceRef="_9" targetRef="data_ops_audit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${data_fg_leader_audit_agree=='true'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#3C3F41;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="data_share_v2">
+      <bpmndi:BPMNShape bpmnElement="startevent_data_share" id="Shape-startevent_data_share">
+        <omgdc:Bounds height="32.0" width="32.0" x="115.0" y="45.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="data_specialist_audit" id="Shape-data_specialist_audit">
+        <omgdc:Bounds height="55.0" width="85.0" x="160.0" y="210.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_5" id="Shape-_5" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="310.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_7" id="Shape-_7">
+        <omgdc:Bounds height="32.0" width="32.0" x="310.0" y="55.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="data_yw_leader_audit" id="Shape-data_yw_leader_audit">
+        <omgdc:Bounds height="55.0" width="85.0" x="420.0" y="340.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_11" id="Shape-_11" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="600.0" y="340.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_14" id="Shape-_14">
+        <omgdc:Bounds height="32.0" width="32.0" x="600.0" y="55.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="data_ops_audit" id="Shape-data_ops_audit">
+        <omgdc:Bounds height="55.0" width="85.0" x="985.0" y="215.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_18" id="Shape-_18">
+        <omgdc:Bounds height="32.0" width="32.0" x="1010.0" y="45.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="data_fg_leader_audit" id="Shape-data_fg_leader_audit">
+        <omgdc:Bounds height="55.0" width="85.0" x="715.0" y="460.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_9" id="Shape-_9" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="870.0" y="470.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_17" id="Shape-_17">
+        <omgdc:Bounds height="32.0" width="32.0" x="870.0" y="55.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_13" id="BPMNEdge__13" sourceElement="_11" targetElement="data_fg_leader_audit">
+        <omgdi:waypoint x="615.0" y="371.0"/>
+        <omgdi:waypoint x="615.0" y="445.0"/>
+        <omgdi:waypoint x="715.0" y="487.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="6.0" width="0.0" x="0.0" y="-130.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_12" id="BPMNEdge__12" sourceElement="data_yw_leader_audit" targetElement="_11">
+        <omgdi:waypoint x="505.0" y="367.5"/>
+        <omgdi:waypoint x="600.0" y="356.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_15" id="BPMNEdge__15" sourceElement="_11" targetElement="_14">
+        <omgdi:waypoint x="616.0" y="340.0"/>
+        <omgdi:waypoint x="616.0" y="87.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_16" id="BPMNEdge__16" sourceElement="data_fg_leader_audit" targetElement="_9">
+        <omgdi:waypoint x="800.0" y="487.5"/>
+        <omgdi:waypoint x="870.0" y="486.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_19" id="BPMNEdge__19" sourceElement="_9" targetElement="_17">
+        <omgdi:waypoint x="886.0" y="470.0"/>
+        <omgdi:waypoint x="886.0" y="87.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_20" id="BPMNEdge__20" sourceElement="_9" targetElement="data_ops_audit">
+        <omgdi:waypoint x="902.0" y="486.0"/>
+        <omgdi:waypoint x="1108.0" y="373.0"/>
+        <omgdi:waypoint x="1070.0" y="242.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_2" id="BPMNEdge__2" sourceElement="data_ops_audit" targetElement="_18">
+        <omgdi:waypoint x="1026.0" y="215.0"/>
+        <omgdi:waypoint x="1026.0" y="77.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3" id="BPMNEdge__3" sourceElement="_11" targetElement="data_ops_audit">
+        <omgdi:waypoint x="616.0" y="372.0"/>
+        <omgdi:waypoint x="853.0" y="383.0"/>
+        <omgdi:waypoint x="1027.5" y="270.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_4" id="BPMNEdge__4" sourceElement="startevent_data_share" targetElement="data_specialist_audit">
+        <omgdi:waypoint x="147.0" y="61.0"/>
+        <omgdi:waypoint x="200.0" y="150.0"/>
+        <omgdi:waypoint x="200.0" y="210.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_6" id="BPMNEdge__6" sourceElement="data_specialist_audit" targetElement="_5">
+        <omgdi:waypoint x="245.0" y="237.5"/>
+        <omgdi:waypoint x="310.0" y="236.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="_5" targetElement="_7">
+        <omgdi:waypoint x="326.0" y="220.0"/>
+        <omgdi:waypoint x="326.0" y="87.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_10" id="BPMNEdge__10" sourceElement="_5" targetElement="data_yw_leader_audit">
+        <omgdi:waypoint x="342.0" y="236.0"/>
+        <omgdi:waypoint x="455.0" y="300.0"/>
+        <omgdi:waypoint x="455.0" y="340.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
